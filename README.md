@@ -1,7 +1,7 @@
 # 🐦 Pterodactyl Panel & MySQL Installer Guide
 
 Selamat datang di panduan **instalasi dan konfigurasi Pterodactyl Panel** beserta MySQL/phpMyAdmin.  
-Panduan ini cocok untuk **server Ubuntu/Debian** dan lengkap dengan cara install panel, install MySQL, setup domain, dan proteksi database.
+Panduan ini cocok untuk **server Ubuntu/Debian** dan lengkap dengan cara install panel, install MySQL, setup domain, serta proteksi database.
 
 ---
 
@@ -9,48 +9,62 @@ Panduan ini cocok untuk **server Ubuntu/Debian** dan lengkap dengan cara install
 
 Gunakan skrip installer resmi dari Pterodactyl:
 
+```bash
 bash <(curl -s https://pterodactyl-installer.se)
+```
 
 Skrip ini akan otomatis mengatur:
+
 - Node.js
 - Panel dependencies
 - Webserver configuration
 - Database configuration
 
-> **Tips:** Pastikan server dijalankan sebagai **root** agar tidak ada kendala permission.
+> **Tips:** Jalankan sebagai **root** agar tidak ada kendala permission.
 
 ---
 
 ## 🔹 2. Installer All-in-One (Panel, MySQL, Domain, dll)
 
-Untuk setup tambahan atau switch domain, gunakan skrip ini:
+Untuk setup tambahan, switch domain, atau update panel:
 
+```bash
 bash <(curl -s https://raw.githubusercontent.com/guldkage/Pterodactyl-Installer/main/installer.sh)
+```
 
 Fitur yang tersedia:
+
 - Install Pterodactyl Panel
 - Install MySQL & phpMyAdmin
 - Switch domain / SSL
-- Backup dan restore database
+- Backup & restore database
 - Update panel & dependencies
 
 ---
 
 ## 🔹 3. Install MySQL & phpMyAdmin Manual
 
-Jika ingin menginstall MySQL secara manual:
+Jika ingin install MySQL secara manual:
 
+```bash
 sudo apt update
+```
+
+```bash
 sudo apt install phpmyadmin
+```
 
-Setelah selesai, kita perlu menambahkan konfigurasi phpMyAdmin ke Nginx.
+### Konfigurasi phpMyAdmin di Nginx
 
-### Edit konfigurasi Nginx:
+Edit file Nginx untuk Pterodactyl:
 
+```bash
 sudo nano /etc/nginx/sites-available/pterodactyl.conf
+```
 
-Tambahkan bagian ini **di dalam server block**:
+Tambahkan **di dalam server block**:
 
+```nginx
 # phpMyAdmin
 location /phpmyadmin {
     root /usr/share/;
@@ -59,7 +73,7 @@ location /phpmyadmin {
     location ~ ^/phpmyadmin/(.+\.php)$ {
         try_files $uri =404;
         root /usr/share/;
-        fastcgi_pass unix:/var/run/php/php8.5-fpm.sock; # sesuaikan versi PHP
+        fastcgi_pass unix:/var/run/php/php8.5-fpm.sock; # sesuaikan versi PHP aktif
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
@@ -69,71 +83,106 @@ location /phpmyadmin {
         root /usr/share/;
     }
 }
+```
 
-> ⚠️ Jangan lupa restart Nginx setelah perubahan:
+Restart Nginx setelah perubahan:
 
+```bash
 sudo systemctl restart nginx
+```
 
 ---
 
 ## 🔹 4. Cek Versi PHP Aktif
 
-Sebelum mengedit fastcgi_pass, pastikan versi PHP yang aktif:
+Sebelum edit `fastcgi_pass`, pastikan PHP-FPM yang aktif:
 
+```bash
 sudo systemctl list-units | grep php
+```
 
 Contoh output:
 
+```
 php8.1-fpm.service   loaded active running PHP 8.1 FPM
 php8.2-fpm.service   loaded inactive dead
+```
 
-> Gunakan versi PHP **yang aktif** pada fastcgi_pass:  
-> Misal: fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+Gunakan versi **active** pada fastcgi_pass:  
 
-Atau cek via command line:
+```nginx
+fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+```
 
+Atau cek via CLI:
+
+```bash
 php -v
-
-Output akan menampilkan versi PHP CLI:
-
-PHP 8.1.18 (cli) (built: ...)
+```
 
 ---
 
-## 🔹 5. Tips & Best Practices
+## 🔹 5. Proteksi Admin Panel & Database
 
-- **Selalu backup** file konfigurasi sebelum diubah.
-- Gunakan **root atau sudo** untuk installasi dan edit file sistem.
-- Untuk panel proteksi, pastikan admin utama (ID 1) memiliki akses penuh.
-- Setelah konfigurasi Nginx atau PHP-FPM diubah, jalankan:
+Pastikan admin utama memiliki **ID 1** agar tetap bisa akses Nodes & Database.  
+Tambahkan snippet proteksi berikut di **NodeController** atau **DatabaseController**:
 
+```php
+use Illuminate\Support\Facades\Auth;
+
+$user = Auth::user();
+if (!$user || $user->id !== 1) {
+    abort(403, '🚫 Akses ditolak! Hanya Admin ID 1.');
+}
+```
+
+> Letakkan di method: `index`, `create`, `update`, `delete`.
+
+---
+
+## 🔹 6. Tips & Best Practices
+
+- **Backup** semua file konfigurasi sebelum diubah.
+- Gunakan **root atau sudo** saat installasi atau edit file sistem.
+- Setelah edit Nginx / PHP-FPM:
+
+```bash
 sudo systemctl restart nginx
-sudo systemctl restart php8.x-fpm
+```
 
-- Gunakan **skrip installer** untuk setup otomatis agar lebih aman dan cepat.
+```bash
+sudo systemctl restart php8.x-fpm
+```
+
+- Gunakan skrip installer untuk setup otomatis agar lebih aman & cepat.
+- Pastikan **MySQL & phpMyAdmin** terhubung dengan benar ke panel.
 
 ---
 
-## 🔹 6. Link Installer
+## 🔹 7. Link Installer
 
 | Fitur                  | Perintah                                                                 |
 |------------------------|--------------------------------------------------------------------------|
-| Install Panel          | bash <(curl -s https://pterodactyl-installer.se)                        |
-| All-in-One Installer   | bash <(curl -s https://raw.githubusercontent.com/guldkage/Pterodactyl-Installer/main/installer.sh) |
-| Install MySQL Manual   | sudo apt update && sudo apt install phpmyadmin                           |
+| Install Panel          | `bash <(curl -s https://pterodactyl-installer.se)`                        |
+| All-in-One Installer   | `bash <(curl -s https://raw.githubusercontent.com/guldkage/Pterodactyl-Installer/main/installer.sh)` |
+| Install MySQL Manual   | `sudo apt update && sudo apt install phpmyadmin`                           |
 
 ---
 
-## 🔹 7. Support / Troubleshooting
+## 🔹 8. Support / Troubleshooting
 
 Jika ada error:
-- Pastikan **server dijalankan sebagai root**.
-- Cek **PHP version dan service status**.
-- Pastikan **Nginx & PHP-FPM restart** setelah konfigurasi.
+
+- Pastikan **server dijalankan sebagai root**
+- Cek **PHP version & service status**
+- Pastikan **Nginx & PHP-FPM restart** setelah konfigurasi
+- Untuk database/proteksi panel, pastikan admin **ID 1** tetap ada
 
 ---
 
 ### 💖 Terima kasih telah menggunakan panduan ini!
+
+
 
 # Pterodactyl Panel Management Script
 
