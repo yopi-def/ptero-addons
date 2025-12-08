@@ -143,6 +143,21 @@ RENAME USER '<nama_user>'@'<host_lama>' TO '<nama_user>'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
+-- Pastikan user yopi sudah dibuat
+```php
+CREATE USER 'yopi'@'localhost' IDENTIFIED BY 'password';
+```
+
+-- Berikan hak istimewa global yang diperlukan
+```php
+GRANT ALL PRIVILEGES ON *.* TO 'yopi'@'localhost' WITH GRANT OPTION;
+```
+
+-- Muat ulang hak istimewa
+```php
+FLUSH PRIVILEGES;
+```
+
 ---
 
 ## 🔹 6. Proteksi Admin Panel & Database
