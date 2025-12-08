@@ -119,10 +119,33 @@ Atau cek via CLI:
 ```bash
 php -v
 ```
+---
+
+## 🔹 5. Ubah user menjadi localhost
+
+masuk ke mysql
+```php
+mysql
+```
+
+user yang diubah itu user yang waktu pertama kali buat panel di ssh
+
+cek user gunakan ini
+```php
+SELECT user, host FROM mysql.user;
+```
+
+```php
+RENAME USER '<nama_user>'@'<host_lama>' TO '<nama_user>'@'localhost';
+```
+
+```php
+FLUSH PRIVILEGES;
+```
 
 ---
 
-## 🔹 5. Proteksi Admin Panel & Database
+## 🔹 6. Proteksi Admin Panel & Database
 
 Pastikan admin utama memiliki **ID 1** agar tetap bisa akses Nodes & Database.  
 Tambahkan snippet proteksi berikut di **NodeController** atau **DatabaseController**:
