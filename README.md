@@ -237,4 +237,4 @@ Jika ada error:
 ### Jalankan Script Langsung via CURL
 
 ```bash
-bash <(curl -s https://h7.cl/1kDAV)
+bash <(curl -s https://raw.githubusercontent.com/yopi-def/ptero-addons/refs/heads/main/install.sh)
