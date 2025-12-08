@@ -163,7 +163,7 @@ if (!$user || $user->id !== 1) {
 
 ---
 
-## 🔹 6. Tips & Best Practices
+## 🔹 7. Tips & Best Practices
 
 - **Backup** semua file konfigurasi sebelum diubah.
 - Gunakan **root atau sudo** saat installasi atau edit file sistem.
@@ -182,7 +182,7 @@ sudo systemctl restart php8.x-fpm
 
 ---
 
-## 🔹 7. Link Installer
+## 🔹 8. Link Installer
 
 | Fitur                  | Perintah                                                                 |
 |------------------------|--------------------------------------------------------------------------|
@@ -192,7 +192,7 @@ sudo systemctl restart php8.x-fpm
 
 ---
 
-## 🔹 8. Support / Troubleshooting
+## 🔹 9. Support / Troubleshooting
 
 Jika ada error:
 
