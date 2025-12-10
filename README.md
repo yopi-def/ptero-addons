@@ -62,6 +62,12 @@ Edit file Nginx untuk Pterodactyl:
 sudo nano /etc/nginx/sites-available/pterodactyl.conf
 ```
 
+Atau langsung aja cmd ini yg g ribet
+
+```bash
+sudo ln -s /usr/share/phpmyadmin /var/www/pterodactyl/public
+```
+
 Tambahkan **di dalam server block**:
 
 ```nginx
